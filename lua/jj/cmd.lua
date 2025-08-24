@@ -778,6 +778,97 @@ function M.log(opts)
 	run(cmd)
 end
 
+function M.set_bookmark()
+	vim.ui.input({
+		prompt = "bookmark: ",
+		default = "",
+	}, function(input)
+		local cmd = string.format("jj bookmark set %s", input)
+
+		local error_msg = string.format("Failed to set bookmark: %s", input)
+
+		local _, success = utils.execute_command(cmd, error_msg)
+		if success then
+			utils.notify(string.format("Set bookmark: %s", input), vim.log.levels.INFO)
+		else
+			utils.notify(error_msg, vim.log.levels.ERROR)
+		end
+	end)
+end
+
+--- Jujutsu git fetch
+function M.fetch()
+	if not utils.ensure_jj() then
+		return
+	end
+
+	local cmd = "jj git fetch"
+	local _, success = utils.execute_command(cmd, "Failed push to remote")
+	if success then
+		utils.notify("Successfully fetched from git remote", vim.log.levels.INFO)
+	else
+		utils.notify("Failed to fetch from git remote", vim.log.levels.ERROR)
+	end
+end
+
+---@param branch_name string name of branch
+local function git_push_with_branch_name(branch_name)
+	if branch_name == "" then
+		-- if user provides empty branch name then we assume the change name
+		local cmd = "jj git push -c @"
+
+		local _, success = utils.execute_command(cmd, "Failed push to remote")
+		if not success then
+			return
+		else
+			utils.notify("Pushed to remote with change name", vim.log.levels.INFO)
+		end
+	else
+		-- if user provides branch name then we use that
+		local cmd = string.format("jj git push --named '%s'=@", branch_name)
+		local _, success = utils.execute_command(cmd, "Failed push to remote")
+		if not success then
+			return
+		else
+			utils.notify(string.format("Pushed to remote with name: '%s'", branch_name), vim.log.levels.INFO)
+		end
+	end
+end
+
+--- Jujutsu git push
+function M.push()
+	if not utils.ensure_jj() then
+		return
+	end
+
+	local cmd = "jj git push"
+	local _, success = utils.execute_command(cmd, "Failed push to remote")
+	if not success then
+		return
+	else
+		utils.notify("Pushed to remote", vim.log.levels.INFO)
+	end
+end
+
+---@param branch_name? string Optional name of branch
+function M.push_to_branch(branch_name)
+	if not utils.ensure_jj() then
+		return
+	end
+
+	-- Check if a branch was provided otherwise require input
+	if not branch_name then
+		vim.ui.input({
+			prompt = "branch_name: ",
+			default = "",
+		}, function(input)
+			if input then
+				git_push_with_branch_name(input)
+			end
+		end)
+	end
+end
+
 ---@class jj.cmd.diff_opts
 ---@field current boolean Wether or not to only diff the current buffer
 
