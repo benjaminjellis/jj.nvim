@@ -786,7 +786,9 @@ function M.set_bookmark()
 		if input then
 			if not input == "" then
 				local cmd = string.format("jj bookmark set '%s'", input)
+
 				utils.notify(cmd, vim.log.levels.INFO)
+
 				local error_msg = string.format("Failed to set bookmark '%s'", input)
 				local _, success = utils.execute_command(cmd, error_msg)
 				if not success then
