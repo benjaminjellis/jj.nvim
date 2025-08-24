@@ -788,6 +788,18 @@ function M.fetch()
 
 	run(cmd)
 end
+
+--- Jujutsu git push
+function M.push()
+	if not utils.ensure_jj() then
+		return
+	end
+
+	local cmd = "jj git push -c @"
+
+	run(cmd)
+end
+
 ---@class jj.cmd.diff_opts
 ---@field current boolean Wether or not to only diff the current buffer
 
