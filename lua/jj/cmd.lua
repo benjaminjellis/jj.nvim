@@ -778,6 +778,26 @@ function M.log(opts)
 	run(cmd)
 end
 
+function M.set_bookmark()
+	vim.ui.input({
+		prompt = "bookmark: ",
+		default = "",
+	}, function(input)
+		if input then
+			if not input == "" then
+				local cmd = string.format("jj bookmark set '%s'", input)
+				local error_msg = string.format("Failed to set bookmark '%s'", input)
+				local _, success = utils.execute_command(cmd, error_msg)
+				if not success then
+					return
+				else
+					utils.notify(error_msg, vim.log.levels.INFO)
+				end
+			end
+		end
+	end)
+end
+
 --- Jujutsu git fetch
 function M.fetch()
 	if not utils.ensure_jj() then
