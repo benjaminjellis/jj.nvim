@@ -791,13 +791,19 @@ end
 
 ---@param branch_name string name of branch
 local function git_push_with_branch_name(branch_name)
-	local cmd = "jj git push --named " .. branch_name .. "=@"
-	run(cmd)
+	local cmd = string.format("jj git push --named '%s'=@", branch_name)
+	local _, success = utils.execute_command(cmd, "Failed push to remote")
+	if not success then
+		return
+	else
+		utils.notify(string.format("Pushed to remote with name: '%s'", branch_name), vim.log.levels.INFO)
+	end
 end
 
 local function git_push_with_change_name()
 	local cmd = "jj git push -c @"
 	run(cmd)
+	utils.notify(string.format("Pushed to remote using change name"), vim.log.levels.INFO)
 end
 
 --- Jujutsu git push
