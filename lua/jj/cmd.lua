@@ -791,7 +791,7 @@ function M.set_bookmark()
 		if success then
 			utils.notify(string.format("Set bookmark: %s", input), vim.log.levels.INFO)
 		else
-			utils.notify(error_msg, vim.log.levels.INFO)
+			utils.notify(error_msg, vim.log.levels.ERROR)
 		end
 	end)
 end
@@ -804,10 +804,10 @@ function M.fetch()
 
 	local cmd = "jj git fetch"
 	local _, success = utils.execute_command(cmd, "Failed push to remote")
-	if not success then
-		return
-	else
+	if success then
 		utils.notify("Successfully fetched from git remote", vim.log.levels.INFO)
+	else
+		utils.notify("Failed to fetch from git remote", vim.log.levels.ERROR)
 	end
 end
 
