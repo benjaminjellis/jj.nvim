@@ -783,15 +783,13 @@ function M.set_bookmark()
 		prompt = "bookmark: ",
 		default = "",
 	}, function(input)
-		utils.notify(string.format("input: '%s'", input), vim.log.levels.INFO)
 		local cmd = string.format("jj bookmark set %s", input)
 
-		utils.notify(cmd, vim.log.levels.INFO)
+		local error_msg = string.format("Failed to set bookmark: %s", input)
 
-		local error_msg = string.format("Failed to set bookmark '%s'", input)
 		local _, success = utils.execute_command(cmd, error_msg)
-		if not success then
-			return
+		if success then
+			utils.notify(string.format("Set bookmark: %s", input), vim.log.levels.INFO)
 		else
 			utils.notify(error_msg, vim.log.levels.INFO)
 		end
