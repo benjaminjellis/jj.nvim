@@ -789,15 +789,41 @@ function M.fetch()
 	run(cmd)
 end
 
+---@param branch_name string name of branch
+local function git_push_with_branch_name(branch_name)
+	local cmd = "jj git push --named " .. "branch_name" .. "=@"
+	run(cmd)
+end
+
+local function git_push_with_change_name()
+	local cmd = "jj git push -c @"
+	run(cmd)
+end
+
 --- Jujutsu git push
-function M.push()
+
+---@param branch_name? string Optional name of branch
+function M.push(branch_name, opts)
 	if not utils.ensure_jj() then
 		return
 	end
 
-	local cmd = "jj git push -c @"
-
-	run(cmd)
+	-- Check if a description was provided otherwise require for input
+	if not branch_name then
+		vim.ui.input({
+			prompt = "branch_name: ",
+			default = "",
+		}, function(input)
+			-- If the user inputs something, execute the push with branch name command
+			if input then
+				git_push_with_branch_name(input)
+			else
+				git_push_with_change_name()
+			end
+			-- Close the current terminal when finished
+			close_terminal_buffer()
+		end)
+	end
 end
 
 ---@class jj.cmd.diff_opts
