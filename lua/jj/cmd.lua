@@ -791,7 +791,7 @@ end
 
 ---@param branch_name string name of branch
 local function git_push_with_branch_name(branch_name)
-	local cmd = "jj git push --named " .. "branch_name" .. "=@"
+	local cmd = "jj git push --named " .. branch_name .. "=@"
 	run(cmd)
 end
 
@@ -803,7 +803,7 @@ end
 --- Jujutsu git push
 
 ---@param branch_name? string Optional name of branch
-function M.push(branch_name, opts)
+function M.push(branch_name)
 	if not utils.ensure_jj() then
 		return
 	end
@@ -816,8 +816,10 @@ function M.push(branch_name, opts)
 		}, function(input)
 			-- If the user inputs something, execute the push with branch name command
 			if input then
+				utils.notify(string.format("pushing to branch: `%s`", input), vim.log.levels.ERROR)
 				git_push_with_branch_name(input)
 			else
+				utils.notify(string.format("pushing to branch nmaed after current change"), vim.log.levels.ERROR)
 				git_push_with_change_name()
 			end
 			-- Close the current terminal when finished
