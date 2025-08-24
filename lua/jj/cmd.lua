@@ -786,6 +786,7 @@ function M.set_bookmark()
 		if input then
 			if not input == "" then
 				local cmd = string.format("jj bookmark set '%s'", input)
+				utils.notify(cmd, vim.log.levels.INFO)
 				local error_msg = string.format("Failed to set bookmark '%s'", input)
 				local _, success = utils.execute_command(cmd, error_msg)
 				if not success then
@@ -816,6 +817,7 @@ end
 ---@param branch_name string name of branch
 local function git_push_with_branch_name(branch_name)
 	if branch_name == "" then
+		-- if user provides empty branch name then we assume the change name
 		local cmd = "jj git push -c @"
 
 		local _, success = utils.execute_command(cmd, "Failed push to remote")
@@ -825,6 +827,7 @@ local function git_push_with_branch_name(branch_name)
 			utils.notify("Pushed to remote with change name", vim.log.levels.INFO)
 		end
 	else
+		-- if user provides branch name then we use that
 		local cmd = string.format("jj git push --named '%s'=@", branch_name)
 		local _, success = utils.execute_command(cmd, "Failed push to remote")
 		if not success then
@@ -835,19 +838,33 @@ local function git_push_with_branch_name(branch_name)
 	end
 end
 
----@param branch_name? string Optional name of branch
-function M.push(branch_name)
+--- Jujutsu git push
+function M.push()
 	if not utils.ensure_jj() then
 		return
 	end
 
-	-- Check if a description was provided otherwise require for input
+	local cmd = "jj git push"
+	local _, success = utils.execute_command(cmd, "Failed push to remote")
+	if not success then
+		return
+	else
+		utils.notify("Pushed to remote", vim.log.levels.INFO)
+	end
+end
+
+---@param branch_name? string Optional name of branch
+function M.push_to_branch(branch_name)
+	if not utils.ensure_jj() then
+		return
+	end
+
+	-- Check if a branch was provided otherwise require input
 	if not branch_name then
 		vim.ui.input({
 			prompt = "branch_name: ",
 			default = "",
 		}, function(input)
-			-- If the user inputs something, execute the push with branch name command
 			if input then
 				git_push_with_branch_name(input)
 			end
