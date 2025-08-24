@@ -791,22 +791,25 @@ end
 
 ---@param branch_name string name of branch
 local function git_push_with_branch_name(branch_name)
-	local cmd = string.format("jj git push --named '%s'=@", branch_name)
-	local _, success = utils.execute_command(cmd, "Failed push to remote")
-	if not success then
-		return
+	if branch_name == "" then
+		local cmd = "jj git push -c @"
+
+		local _, success = utils.execute_command(cmd, "Failed push to remote")
+		if not success then
+			return
+		else
+			utils.notify("Pushed to remote with change name", vim.log.levels.INFO)
+		end
 	else
-		utils.notify(string.format("Pushed to remote with name: '%s'", branch_name), vim.log.levels.INFO)
+		local cmd = string.format("jj git push --named '%s'=@", branch_name)
+		local _, success = utils.execute_command(cmd, "Failed push to remote")
+		if not success then
+			return
+		else
+			utils.notify(string.format("Pushed to remote with name: '%s'", branch_name), vim.log.levels.INFO)
+		end
 	end
 end
-
-local function git_push_with_change_name()
-	local cmd = "jj git push -c @"
-	run(cmd)
-	utils.notify(string.format("Pushed to remote using change name"), vim.log.levels.INFO)
-end
-
---- Jujutsu git push
 
 ---@param branch_name? string Optional name of branch
 function M.push(branch_name)
@@ -822,14 +825,8 @@ function M.push(branch_name)
 		}, function(input)
 			-- If the user inputs something, execute the push with branch name command
 			if input then
-				utils.notify(string.format("pushing to branch: `%s`", input), vim.log.levels.ERROR)
 				git_push_with_branch_name(input)
-			else
-				utils.notify(string.format("pushing to branch nmaed after current change"), vim.log.levels.ERROR)
-				git_push_with_change_name()
 			end
-			-- Close the current terminal when finished
-			close_terminal_buffer()
 		end)
 	end
 end
