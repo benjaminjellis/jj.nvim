@@ -785,8 +785,12 @@ function M.fetch()
 	end
 
 	local cmd = "jj git fetch"
-
-	run(cmd)
+	local _, success = utils.execute_command(cmd, "Failed push to remote")
+	if not success then
+		return
+	else
+		utils.notify("Successfully fetched from git remote", vim.log.levels.INFO)
+	end
 end
 
 ---@param branch_name string name of branch
